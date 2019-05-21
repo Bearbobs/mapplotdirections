@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Embed maps on webpage with direction</title>
+    <style>
+    #map {
+      height: 425px;
+  }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+  } 
+    #floating-panel {
+      position: absolute;
+      top: 10px;
+      left: 25%;
+      z-index: 5;
+      background-color: #fff;
+      padding: 5px;
+      border: 1px solid #999;
+      text-align: center;
+      line-height: 30px;
+      padding-left: 10px;
+  }
+    </style>
+  </head>
+  <body>
+    <div id="floating-panel">
+  <b>Start: </b>
+  
+  <select id="start">
+  <option value="India Gate, Delhi , India">India Gate</option>
+  <option value="Agra , India">Agra</option>
+</select>
+  <b>End: </b>
+  <select id="end">
+  <option value="Lotus Temple, Delhi, India">Lotus Temple </option>
+  <option value="gurgaon, India">Gurgaon </option>
+</select>
+</div>
+<div id="map"></div>
+&nbsp;
+<div id="warnings-panel"></div>
+    <script>
+      function initMap() {
+  var markerArray = [];
+  var directionsService = new google.maps.DirectionsService;
+  var map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 13,
+    center: {
+      lat: 28.7041,
+      lng: 77.1025
+    }
+  });
+  var directionsDisplay = new google.maps.DirectionsRenderer({
+    map: map
+  });
+  var stepDisplay = new google.maps.InfoWindow;
+  calculateAndDisplayRoute(
+    directionsDisplay, directionsService, markerArray, stepDisplay, map);
+  var onChangeHandler = function() {
+    calculateAndDisplayRoute(
+      directionsDisplay, directionsService, markerArray, stepDisplay, map);
+  };
+  document.getElementById('start').addEventListener('change', onChangeHandler);
+  document.getElementById('end').addEventListener('change', onChangeHandler);
+}
+
+function calculateAndDisplayRoute(directionsDisplay, directionsService,
+  markerArray, stepDisplay, map) {
+  for (var i = 0; i < markerArray.length; i++) {
+    markerArray[i].setMap(null);
+  }
+  directionsService.route({
+    origin: document.getElementById('start').value,
+    destination: document.getElementById('end').value,
+    travelMode: 'WALKING'
+  }, function(response, status) {
+    if (status === 'OK') {
+      document.getElementById('warnings-panel').innerHTML =
+        '<b>' + response.routes[0].warnings + '</b>';
+      directionsDisplay.setDirections(response);
+      showSteps(response, markerArray, stepDisplay, map);
+    } else {
+      window.alert('Directions request failed due to ' + status);
+    }
+  });
+}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCkUOdZ5y7hMm0yrcCQoCvLwzdM6M8s5qk&callback=initMap">
+    </script>
+  </body>
+</html>
